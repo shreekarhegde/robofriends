@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { robots } from './robots';
-import CardList from './CardList/CardList';
-import SearchBox from './SearchBox/SearchBox';
+import { robots } from '../robots';
+import CardList from '../components/CardList/CardList';
+import SearchBox from '../components/SearchBox/SearchBox';
 
 class App extends Component {
 	constructor() {
@@ -12,8 +12,13 @@ class App extends Component {
 		};
 	}
 
+	componentDidMount() {
+		fetch('https://jsonplaceholder.typicode.com/users')
+			.then((res) => res.json())
+			.then((users) => this.setState({ robots: users }));
+	}
+
 	onSearchChange = (event) => {
-		console.log('event', event);
 		this.setState({ searchField: event.target.value });
 	};
 
@@ -22,7 +27,7 @@ class App extends Component {
 			return robot.name.toLowerCase().includes(this.state.searchField.toLowerCase());
 		});
 		return (
-			<div>
+			<div className='tc'>
 				<h1>Robo Friends</h1>
 				<div>
 					<SearchBox searchChange={this.onSearchChange} />
