@@ -1,33 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { requestRobots, setSearchField } from '../actions';
 import CardList from '../components/CardList/CardList';
 import SearchBox from '../components/SearchBox/SearchBox';
+import { REQUEST_ROBOTS_FAIL } from '../constants';
 
-function App() {
-	const [robots, setRobots] = useState([])
-	const [searchfield, setSearchfield] = useState('')
-	useEffect(()=> {
-	  fetch('https://jsonplaceholder.typicode.com/users')
-	   .then(response=> response.json())
-	   .then(users => {setRobots(users)});
-	},[]) 
-	const onSearchChange = (event) => {
-	  setSearchfield(event.target.value)
+const mapStateToProps = (state) => {
+	return {
+		searchField: state.searchRobots.searchField,
+		robots: state.requestRobots.robots,
+		isPending: state.requestRobots.isPending,
+		error: state.requestRobots.error,
+	};
+};
+
+const mapDispatchToPorps = (dispatch) => {
+	return {
+		onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+		onRequestRobots: () => dispatch(requestRobots()),
+	};
+};
+
+class App extends Component {
+	componentDidMount() {
+		this.props.onRequestRobots();
 	}
-	const filteredRobots = robots.filter(robot =>{
-	  return robot.name.toLowerCase().includes(searchfield.toLowerCase());
-	})
-	return !robots.length ?
-	  <h1>Loading</h1> :
-	  (
-		<div className='tc'>
-		  <h1 className='f1'>RoboFriends</h1>
-		  <SearchBox searchChange={onSearchChange}/>
-			<CardList robots={filteredRobots} />
-		</div>
-	  );
+
+	render() {
+		const { robots, searchField, onSearchChange, isPending } = this.props;
+		console.log('====================================');
+		console.log('props', this.props);
+		console.log('====================================');
+		const filteredRobots = robots.filter((robot) => {
+			return robot.name.toLowerCase().includes(searchField.toLowerCase());
+		});
+		return isPending ? (
+			<h1>Loading</h1>
+		) : (
+			<div className="tc">
+				<h1 className="f1">RoboFriends</h1>
+				<SearchBox searchChange={onSearchChange} />
+				<CardList robots={filteredRobots} />
+			</div>
+		);
+	}
 }
 
-
-
-
-export default App;
+export default connect(mapStateToProps, mapDispatchToPorps)(App);
